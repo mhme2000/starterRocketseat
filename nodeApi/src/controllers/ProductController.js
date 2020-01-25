@@ -4,11 +4,11 @@ const mongoose = require('mongoose')
 const Product = mongoose.model('Product')
 
 module.exports = {
-    async index(require, response) {
+    async index(req, res ) {
         const { page = 1} = req.query
         const products = await Product.paginate({}, { page, limit: 5})
 
-        return response.json(products)
+        return res.json(products)
     },
 
     async show(req, res){
