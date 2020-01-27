@@ -1,9 +1,12 @@
 import React, { Component } from 'react'
 import api from '../../services/api'
-
+import './style.css'
+import { Link } from 'react-router-dom'
 export default class Main extends Component {
    state =  {
-        products:[]
+        products:[],
+        productInfo: {},
+        page: 1,
    }
    
    
@@ -11,24 +14,51 @@ export default class Main extends Component {
        this.loadProducts()
    }
 
-   loadProducts = async() => {
-       const response = await api.get('/products')
+   loadProducts = async(page = 1) => {
+       const response = await api.get(`/products?page=${page}`)
        
-       console.log(response.data.docs)
+       const { docs, ...productInfo } = response.data
 
-       this.setState({ products : response.data.docs})
+
+       this.setState({ products : docs, productInfo, page})
+   }
+
+   prevPage = () => {
+        const { page, productInfo } = this.state
+
+        if(page === 1) return
+
+        const pageNumber = page - 1
+
+        this.loadProducts(pageNumber)
+   }
+
+   nextPage = () => {
+       const { page, productInfo } = this.state
+
+       if (page === productInfo.pages) return
+
+       const pageNumber = page + 1
+       
+       this.loadProducts(pageNumber)
    }
 
     render(){
-    return ( 
+    const { products, page, productInfo } = this.state
+    
+        return ( 
             <div className="productList">
                 {this.state.products.map(products => { return (                
                 <article key="{products._id}">
                     <strong>{products.title}</strong>
                     <p>{products.description}</p>
-                    <a href="">Acessar</a>
+                    <Link to={`/products/${products._id}`}>Acessar</Link>
                     </article>
                     )})}
+                    <div className="action">
+                        <button disabled={page === 1} onClick={this.prevPage}>Anterior</button>
+                        <button disabled={page === productInfo.pages} onClick={this.nextPage}>Próximo</button>
+                    </div>
             </div>
         )
 } 
